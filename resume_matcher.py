@@ -9,7 +9,6 @@
 # purpose of numpy is to handle the numerical data and perform operations like calculating the average similarity score, which gives us an overall measure of how well your resume matches the job description.
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 # The 'all-MiniLM-L6-v2' model is a pre-trained model that is designed to create meaningful vector representations of sentences. It is efficient and works well for tasks like semantic similarity, which is what we need for comparing the skills in your resume with those in the job description.
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -36,9 +35,6 @@ def semantic_similarity(resume, jd):
     jd_vector = jd_vector.reshape(1, -1)
     similarity_score = cosine_similarity(resume_vector, jd_vector)[0][0]
     return similarity_score*100
-resume = "Experienced web developer skilled in HTML, CSS, JavaScript, and React."
-jd = "Seeking a software engineer with experience in Python and machine learning."
-print(semantic_similarity(resume, jd))
 
 # Task 4: Integrate the Functions by creating master function that combines the matched/missing skills and the semantic similarity score into a comprehensive report.
 def get_match_score(resume_text, jd_text, resume_skills, jd_skills):
