@@ -120,3 +120,32 @@ if __name__ == "__main__":
     result_4 = get_match_score(res_text_4, jd_text_4, res_skills_4, jd_skills_4)
     print(f"Final Score: {result_4['Final Score (%)']}% | AI Score: {result_4['AI Context Score (%)']}% | Exact Skills Score: {result_4['Exact Skills Score (%)']}% | Matched Skills: {result_4['Matched Skills']} | Missing Skills: {result_4['Missing Skills']}")
     print("="*40 + "\n")
+
+    # Test 5 : My own CV:
+    # ---------------------------------------------------------
+    # TEST 6: HARSH vs. BETTERMILE (The Real Deal)
+    # ---------------------------------------------------------
+    print("TEST 6: HARSH'S CV vs. BETTERMILE DATA/ML ROLE")
+    
+    # Your CV Text & Skills
+    res_text_bm = """Computer Science student in Berlin, Germany. Experience with Python, SQL, 
+    Exploratory Data Analysis (EDA), Machine Learning Pipeline Automation, evaluating classification models, 
+    data preprocessing, and visualizations using Pandas, Matplotlib, and Scikit-learn. English professional."""
+    
+    res_skills_bm = ["python", "sql", "exploratory data analysis", "machine learning", "data pipelines", 
+                     "data preprocessing", "pandas", "scikit-learn", "matplotlib", "english", "analytical thinking"]
+    
+    # Bettermile JD Text & Skills
+    jd_text_bm = """Data role at Bettermile in Berlin. Tasks include Exploratory Data Analysis (EDA), 
+    evaluating ML models, data pipelines, and dashboards. Requires Python, SQL, data visualization, 
+    statistical methods, English, and analytical thinking."""
+    
+    jd_skills_bm = ["python", "sql", "exploratory data analysis", "ml models", "data pipelines", 
+                    "data visualization", "statistical methods", "english", "analytical thinking", "dashboards"]
+    
+    result_6 = get_match_score(res_text_bm, jd_text_bm, res_skills_bm, jd_skills_bm)
+    
+    print(f"Final Score: {result_6['Final Score (%)']}% | AI Score: {result_6['AI Context Score (%)']}% | Exact Skills Score: {result_6['Exact Skills Score (%)']}%")
+    print(f"Matched Skills: {result_6['Matched Skills']}")
+    print(f"Missing Skills: {result_6['Missing Skills']}")
+    print("="*40 + "\n")
