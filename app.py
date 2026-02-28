@@ -1,13 +1,43 @@
 import customtkinter
+from pypdf import PdfReader
 from tkinter import filedialog as fd
+from extract_skills_pdf import extract_skills
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("blue")
 app = customtkinter.CTk()
 app.title("AI Resume Matcher")
 app.geometry("900x600")
+file_path_var = customtkinter.StringVar()
 def calculate_match():
     # Placeholder function for calculating match score
     pass
+
+def file_path():
+    filetypes = (("PDF files", "*.pdf"), ("All files", "*.*"))
+    filename = fd.askopenfilename(title="Open a file", initialdir="/", filetypes=filetypes)
+    file_path_var.set(filename)
+    customtkinter.CTkLabel(
+    left_frame,
+    text=file_path_var.get(),
+    font=customtkinter.CTkFont(size=12),
+    text_color="gray",
+).pack(pady=(0, 14))
+    if filename:
+        resume_text = extract_text_from_pdf(filename)
+        print(resume_text)
+        print(extract_skills(resume_text))
+# open the pdf and extract text
+def extract_text_from_pdf(file_path):
+    try:
+        reader = PdfReader(file_path)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text()
+        return text
+    except Exception as e:
+        print(f"Error reading PDF: {e}")
+        return ""
+print("\n" + "="*40)
 
 # Add a label
 label = customtkinter.CTkLabel(app, text="Resume-Matcher", font=("Helvetica", 20))
@@ -27,8 +57,12 @@ customtkinter.CTkLabel(
     text_color="gray",
 ).pack(pady=(0, 14))
 #button
-upload_btn = customtkinter.CTkButton(left_frame, text="Upload Pdf", font=customtkinter.CTkFont(size=12), command=lambda: fd.askopenfilename(filetypes=[("PDF files", "*.pdf")]))
+
+    
+
+upload_btn = customtkinter.CTkButton(left_frame, text="Upload Pdf", font=customtkinter.CTkFont(size=12), command=file_path)
 upload_btn.pack(padx=20, pady=10)
+
 
 # right frame
 right_frame = customtkinter.CTkFrame(middle_frame)
@@ -54,5 +88,7 @@ calculate_button.pack(pady=20, padx=40, fill="x")
 # result label bottom
 result_label = customtkinter.CTkLabel(bottom_frame, text="Match Score: N/A", font=customtkinter.CTkFont(size=16, weight="bold"))
 result_label.pack(pady=30)
+
+
 
 app.mainloop()
