@@ -1,4 +1,5 @@
 import customtkinter
+from tkinter import filedialog as fd
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("blue")
 app = customtkinter.CTk()
@@ -26,7 +27,7 @@ customtkinter.CTkLabel(
     text_color="gray",
 ).pack(pady=(0, 14))
 #button
-upload_btn = customtkinter.CTkButton(left_frame, text="Upload Pdf", font=customtkinter.CTkFont(size=12))
+upload_btn = customtkinter.CTkButton(left_frame, text="Upload Pdf", font=customtkinter.CTkFont(size=12), command=lambda: fd.askopenfilename(filetypes=[("PDF files", "*.pdf")]))
 upload_btn.pack(padx=20, pady=10)
 
 # right frame
