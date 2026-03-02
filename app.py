@@ -8,9 +8,11 @@ app = customtkinter.CTk()
 app.title("AI Resume Matcher")
 app.geometry("900x600")
 file_path_var = customtkinter.StringVar()
+pdf_file_path = None
 def calculate_match():
-    # Placeholder function for calculating match score
-    pass
+
+    jd_textbox = jd_textbox.get("1.0", "end-1c") # Get the text from the textbox
+    pdf_file_path = file
 
 def file_path():
     filetypes = (("PDF files", "*.pdf"), ("All files", "*.*"))
@@ -23,9 +25,10 @@ def file_path():
     text_color="gray",
 ).pack(pady=(0, 14))
     if filename:
-        resume_text = extract_text_from_pdf(filename)
-        print(resume_text)
-        print(extract_skills(resume_text))
+        pdf_file_path = filename
+        extract_text_from_pdf(filename)
+        print(f"Selected file: {filename}")
+
 # open the pdf and extract text
 def extract_text_from_pdf(file_path):
     try:
