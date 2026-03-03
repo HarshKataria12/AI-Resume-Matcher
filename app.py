@@ -2,6 +2,7 @@ import customtkinter
 from pypdf import PdfReader
 from tkinter import filedialog as fd
 from extract_skills_pdf import extract_skills
+from resume_matcher import get_match_score
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("blue")
 app = customtkinter.CTk()
@@ -11,10 +12,60 @@ file_path_var = customtkinter.StringVar()
 pdf_file_path = None
 def calculate_match():
 
-    jd_textbox = jd_textbox.get("1.0", "end-1c") # Get the text from the textbox
-    pdf_file_path = file
+    jd_text = jd_textbox.get("1.0", "end-1c") # Get the text from the textbox
+    # Check if the PDF file path and JD text are available
+    if not pdf_file_path:
+        result_label.configure(text="Please upload a resume PDF first.")
+        return
+    if not jd_text:
+        result_label.configure(text="Please enter a Job Description in the textbox.")
+        return
+    # Update the result label to show that the AI is processing
+    result_label.configure(text="AI is reading your resume... Please wait ⏳", text_color="yellow")
+    app.update() # This forces the app to update the text on the screen instantly
+    # Read the PDF Text
+    resume_text = extract_text_from_pdf(pdf_file_path)
+    # 5. UI Update: Extracting Skills
+    result_label.configure(text="Extracting skills with AI... 🧠", text_color="yellow")
+    app.update()
+    result_skills = extract_skills(resume_text)
+    jd_skills = extract_skills(jd_text)
+    if not result_skills:
+        result_label.configure(text="No skills found in the resume PDF.")
+        return
+    if not jd_skills:
+        result_label.configure(text="No skills found in the Job Description.")
+        return
+    # 6. UI Update: Running the Math
+    result_label.configure(text="Calculating match score... 🧮", text_color="yellow")
+    app.update()
+    # Calculate the match score
+    match_score = get_match_score(resume_text,jd_text,result_skills, jd_skills)
+    
+    # Extract the exact values from your dictionary
+    final_score = match_score["Final Score (%)"]
+    matched_skills = match_score["Matched Skills"]
+    missing_skills = match_score["Missing Skills"]
+    matched_str = ", ".join(matched_skills) if matched_skills else "None"
+    missing_str = ", ".join(missing_skills) if missing_skills else "None"
+        
+        # Format the text beautifully
+    display_text = (
+        f"🎯 Final Match Score: {final_score}%\n\n"
+        f"✅ Matched ({len(matched_skills)}): {matched_str}\n\n"
+        f"❌ Missing ({len(missing_skills)}): {missing_str}"
+    )
+        
+        # Update the UI
+    result_label.configure(text=display_text, text_color="#00FF00")
+    
+
+
+    
+    
 
 def file_path():
+    global pdf_file_path # Declare as global to modify the variable outside the function
     filetypes = (("PDF files", "*.pdf"), ("All files", "*.*"))
     filename = fd.askopenfilename(title="Open a file", initialdir="/", filetypes=filetypes)
     file_path_var.set(filename)
@@ -26,7 +77,7 @@ def file_path():
 ).pack(pady=(0, 14))
     if filename:
         pdf_file_path = filename
-        extract_text_from_pdf(filename)
+
         print(f"Selected file: {filename}")
 
 # open the pdf and extract text
@@ -89,8 +140,13 @@ bottom_frame.pack(fill="x", padx=20, pady=(0, 20))
 calculate_button = customtkinter.CTkButton(bottom_frame, text="Calculate Match Score", font=customtkinter.CTkFont(size=20, weight="bold"),height=50,command=calculate_match)
 calculate_button.pack(pady=20, padx=40, fill="x")
 # result label bottom
-result_label = customtkinter.CTkLabel(bottom_frame, text="Match Score: N/A", font=customtkinter.CTkFont(size=16, weight="bold"))
-result_label.pack(pady=30)
+result_label = customtkinter.CTkLabel(
+    bottom_frame, 
+    text="Upload your Resume and Job Description to begin.", 
+    font=customtkinter.CTkFont(size=14, weight="bold"),
+    justify="center",
+    wraplength=800  
+result_label.pack(pady=(10, 20))
 
 
 
