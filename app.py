@@ -146,6 +146,7 @@ result_label = customtkinter.CTkLabel(
     font=customtkinter.CTkFont(size=14, weight="bold"),
     justify="center",
     wraplength=800  
+)
 result_label.pack(pady=(10, 20))
 
 

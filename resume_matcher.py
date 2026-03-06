@@ -13,17 +13,23 @@ from sklearn.metrics.pairwise import cosine_similarity
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Task 2: Extracting Matched and Missing Skills
+# Task 2: Extracting Matched and Missing Skills
 def extract_match(resume_skills, jd_skills):
-    resume_set = set(resume_skills)
-    jd_set = set(jd_skills)
+    # Convert all to lowercase and remove trailing/leading whitespace 
+    resume_set = set([str(skill).lower().strip() for skill in resume_skills])
+    jd_set = set([str(skill).lower().strip() for skill in jd_skills])
+    
     similarity = resume_set.intersection(jd_set)
     missing = jd_set.difference(resume_set)
+    
+    # Calculate score
     score = (len(similarity) / len(jd_set) * 100) if jd_set else 0
+    
     return {
         "matched_skills": list(similarity),
         "missing_skills": list(missing),
-        "match_score": score}
-
+        "match_score": score
+    }
 # Task 3: Build the Semantic Similarity Function
 def semantic_similarity(resume, jd):
     # the reason we don't use np model.encode directly is because it returns a 1D array, and the cosine_similarity function expects 2D arrays. By reshaping the vectors to 2D arrays, we can ensure that they are in the correct format for the cosine_similarity function to compute the similarity score accurately.
