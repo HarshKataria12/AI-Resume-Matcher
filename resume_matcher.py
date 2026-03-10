@@ -9,12 +9,34 @@
 # purpose of numpy is to handle the numerical data and perform operations like calculating the average similarity score, which gives us an overall measure of how well your resume matches the job description.
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from difflib import SequenceMatcher
 import json
 import os
 # The 'all-MiniLM-L6-v2' model is a pre-trained model that is designed to create meaningful vector representations of sentences. It is efficient and works well for tasks like semantic similarity, which is what we need for comparing the skills in your resume with those in the job description.
 model = SentenceTransformer('all-MiniLM-L6-v2')
 # Point this to your actual database file
 
+
+def _fuzzy_match(skill_a: str, skill_b: str) -> bool:
+    """
+    Return True if two skills should be considered the same, even if worded differently.
+
+    Three checks (any one passing = match):
+    1. Exact match           → "german" == "german"
+    2. Substring containment → "german" in "b1 german"  /  "german" in "german language"
+    3. High similarity ratio → SequenceMatcher >= 0.80 catches minor spelling differences
+    """
+    a = skill_a.lower().strip()
+    b = skill_b.lower().strip()
+
+    if a == b:
+        return True
+    if a in b or b in a:
+        return True
+    ratio = SequenceMatcher(None, a, b).ratio()
+    if ratio >= 0.80:
+        return True
+    return False
 # Task 2: Extracting Matched and Missing Skills
 # Task 2: Extracting Matched and Missing Skills
 def extract_match(resume_skills, jd_skills):
@@ -22,28 +44,32 @@ def extract_match(resume_skills, jd_skills):
     resume_set = set([str(skill).lower().strip() for skill in resume_skills])
     jd_set = set([str(skill).lower().strip() for skill in jd_skills])
     
-    similarity = resume_set.intersection(jd_set)
-    missing = jd_set.difference(resume_set)
-    
-    # Calculate score
-    score = (len(similarity) / len(jd_set) * 100) if jd_set else 0
-    
+    matched = []
+    missing = []
+
+    for jd_skill in jd_set:
+        if any(_fuzzy_match(jd_skill, r) for r in resume_set):
+            matched.append(jd_skill)
+        else:
+            missing.append(jd_skill)
+
+    score = (len(matched) / len(jd_set) * 100) if jd_set else 0
+
     return {
-        "matched_skills": list(similarity),
-        "missing_skills": list(missing),
+        "matched_skills": sorted(matched),
+        "missing_skills": sorted(missing),
         "match_score": score
     }
 # Task 3: Build the Semantic Similarity Function
-def semantic_similarity(resume, jd):
-    # the reason we don't use np model.encode directly is because it returns a 1D array, and the cosine_similarity function expects 2D arrays. By reshaping the vectors to 2D arrays, we can ensure that they are in the correct format for the cosine_similarity function to compute the similarity score accurately.
-    resume_vector = model.encode(resume)
-    jd_vector = model.encode(jd)
-    
-    # reshaping the vectors to 2D arrays for cosine_similarity function
-    resume_vector = resume_vector.reshape(1, -1)
-    jd_vector = jd_vector.reshape(1, -1)
-    similarity_score = cosine_similarity(resume_vector, jd_vector)[0][0]
-    return max(0, similarity_score * 100)
+def semantic_similarity(resume: str, jd: str) -> float:
+    try:
+        resume_vector = model.encode(resume).reshape(1, -1)
+        jd_vector     = model.encode(jd).reshape(1, -1)
+        score = cosine_similarity(resume_vector, jd_vector)[0][0]
+        return max(0.0, float(score) * 100)
+    except Exception as e:
+        print(f"Semantic similarity error: {e}")
+        return 0.0
 
 # Task 4: Integrate the Functions by creating master function that combines the matched/missing skills and the semantic similarity score into a comprehensive report.
 def get_match_score(resume_text, jd_text, resume_skills, jd_skills):
